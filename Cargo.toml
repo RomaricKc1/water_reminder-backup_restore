@@ -1,0 +1,24 @@
+[workspace]
+resolver = "3"
+
+members = ["crates/app", "crates/lib", "crates/tui"]
+
+[workspace.package]
+version = "26.1.0"
+description = "Helper to listen and communication data for the import and export"
+license = "MIT"
+edition = "2024"
+rust-version = "1.86.0"
+
+[workspace.dependencies]
+lib = { package = "lib", path = "crates/lib" }
+tui = { package = "tui", path = "crates/tui" }
+serde = { version = "1.0.228", features = ["derive"] }
+clap = { version = "4.5.58", features = ["derive"] }
+serde_json = { version = "1.0.149", features = ["default"] }
+axum = { version = "0.8.8", features = ["default"] }
+tokio = { version = "1.49.0", features = ["full", "tracing"] }
+chrono = { version = "0.4.43" }
+
+[profile.release]
+opt-level = "s"

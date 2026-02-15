@@ -1,0 +1,77 @@
+name: Build and test
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  cargo-build:
+    name: "Rust cargo build"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install stable rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-all-crates: "true"
+          workspaces: .
+
+      - name: Cargo build
+        run: |
+          cargo build --release --bin watchAppHelper
+          echo "tui mode"
+          cargo build --release --bin watchAppHelper-Tui
+
+      - name: Upload helper bin
+        uses: actions/upload-artifact@v6
+        with:
+          name: rust_helper_bins_cli_tui
+          path: |
+            target/release/watchAppHelper
+            target/release/watchAppHelper-Tui
+
+  cargo-clippy:
+    name: "Rust cargo clippy"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install stable rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-all-crates: "true"
+          workspaces: .
+
+      - name: Rust clippy
+        run: cargo clippy --all --all-targets
+
+  cargo-fmt:
+    name: "Rust cargo fmt"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install rust nightly
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt
+
+      - name: Rust fmt
+        run: cargo +nightly fmt --check --all
